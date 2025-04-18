@@ -24,9 +24,9 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
-            <div className="flex min-h-screen">
+            <div className="flex flex-col md:flex-row min-h-screen">
               <Sidebar />
-              <main className="flex-1 bg-background">{children}</main>
+              <main className="flex-1 bg-background w-full">{children}</main>
             </div>
           </AuthProvider>
         </ThemeProvider>

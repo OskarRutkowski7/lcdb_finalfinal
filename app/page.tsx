@@ -84,41 +84,6 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
-
-        <Card className="border-primary/20">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Latest Updates</h2>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-card/60">
-                <div className="bg-primary/20 p-2 rounded-md">
-                  <span className="text-xs font-bold">NEW</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">The Middle Little Brother SinClair Added</h3>
-                  <p className="text-sm text-muted-foreground">2025-04-03</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-card/60">
-                <div className="bg-primary/20 p-2 rounded-md">
-                  <span className="text-xs font-bold">NEW</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Heishou Pack - Mao Branch Updated</h3>
-                  <p className="text-sm text-muted-foreground">2025-03-20</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-card/60">
-                <div className="bg-primary/20 p-2 rounded-md">
-                  <span className="text-xs font-bold">EVENT</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Mirror of the Dreaming Event</h3>
-                  <p className="text-sm text-muted-foreground">Ongoing</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

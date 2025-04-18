@@ -3,21 +3,119 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 
 // Mock data for Sinners
 const sinners = [
-  { id: 1, name: "Yi Sang", rarity: 3, sin: "Wrath", image: "/placeholder.svg?height=120&width=120" },
-  { id: 2, name: "Faust", rarity: 3, sin: "Lust", image: "/placeholder.svg?height=120&width=120" },
-  { id: 3, name: "Don Quixote", rarity: 3, sin: "Pride", image: "/placeholder.svg?height=120&width=120" },
-  { id: 4, name: "Ryōshū", rarity: 3, sin: "Sloth", image: "/placeholder.svg?height=120&width=120" },
-  { id: 5, name: "Meursault", rarity: 3, sin: "Gluttony", image: "/placeholder.svg?height=120&width=120" },
-  { id: 6, name: "Hong Lu", rarity: 3, sin: "Wrath", image: "/placeholder.svg?height=120&width=120" },
-  { id: 7, name: "Heathcliff", rarity: 3, sin: "Envy", image: "/placeholder.svg?height=120&width=120" },
-  { id: 8, name: "Ishmael", rarity: 3, sin: "Gluttony", image: "/placeholder.svg?height=120&width=120" },
-  { id: 9, name: "Rodion", rarity: 3, sin: "Greed", image: "/placeholder.svg?height=120&width=120" },
-  { id: 10, name: "Sinclair", rarity: 3, sin: "Pride", image: "/placeholder.svg?height=120&width=120" },
-  { id: 11, name: "Outis", rarity: 3, sin: "Sloth", image: "/placeholder.svg?height=120&width=120" },
-  { id: 12, name: "Gregor", rarity: 3, sin: "Envy", image: "/placeholder.svg?height=120&width=120" },
+  {
+    id: 1,
+    name: "Yi Sang",
+    title: "Liu Assoc. South Section 3",
+    rarity: 3,
+    sin: "Wrath",
+    damage: "Slash",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 2,
+    name: "Faust",
+    title: "The Lobotomy Corp Remnant",
+    rarity: 3,
+    sin: "Lust",
+    damage: "Pierce",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 3,
+    name: "Don Quixote",
+    title: "The Knight of Ruination",
+    rarity: 3,
+    sin: "Pride",
+    damage: "Slash",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 4,
+    name: "Ryōshū",
+    title: "The Kaguya of Moonlight",
+    rarity: 3,
+    sin: "Sloth",
+    damage: "Slash",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 5,
+    name: "Meursault",
+    title: "The Outis Executioner",
+    rarity: 3,
+    sin: "Gluttony",
+    damage: "Blunt",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 6,
+    name: "Hong Lu",
+    title: "The Crimson Axe",
+    rarity: 3,
+    sin: "Wrath",
+    damage: "Slash",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 7,
+    name: "Heathcliff",
+    title: "The Vengeful One",
+    rarity: 3,
+    sin: "Envy",
+    damage: "Blunt",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 8,
+    name: "Ishmael",
+    title: "The White Whale Hunter",
+    rarity: 3,
+    sin: "Gluttony",
+    damage: "Pierce",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 9,
+    name: "Rodion",
+    title: "The Nihilist Student",
+    rarity: 3,
+    sin: "Greed",
+    damage: "Pierce",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 10,
+    name: "Sinclair",
+    title: "The Middle Little Brother",
+    rarity: 3,
+    sin: "Pride",
+    damage: "Blunt",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 11,
+    name: "Outis",
+    title: "The Faceless One",
+    rarity: 3,
+    sin: "Sloth",
+    damage: "Pierce",
+    image: "/placeholder.svg?height=120&width=120",
+  },
+  {
+    id: 12,
+    name: "Gregor",
+    title: "The Metamorphosed",
+    rarity: 3,
+    sin: "Envy",
+    damage: "Blunt",
+    image: "/placeholder.svg?height=120&width=120",
+  },
 ]
 
 export default function IdentityPage() {
@@ -29,6 +127,11 @@ export default function IdentityPage() {
           <p className="text-muted-foreground">
             Browse and search for detailed information about all Sinners in Limbus Company
           </p>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search identities by name, sin, or damage type..." className="pl-10" />
         </div>
 
         <Tabs defaultValue="all" className="w-full">

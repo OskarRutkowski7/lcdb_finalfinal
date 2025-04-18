@@ -4,8 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Users, Shield, Menu, X } from "lucide-react"
-import { useState } from "react"
+import { Users, Shield, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react"
 
 // Update the navItems array to only include the requested sections
 const navItems = [
@@ -17,9 +17,26 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // Check if sidebar state is stored in localStorage on component mount
+  useEffect(() => {
+    const storedState = localStorage.getItem("sidebarCollapsed")
+    if (storedState !== null) {
+      setIsCollapsed(storedState === "true")
+    }
+  }, [])
+
+  // Save sidebar state to localStorage when it changes
+  const toggleCollapse = () => {
+    const newState = !isCollapsed
+    setIsCollapsed(newState)
+    localStorage.setItem("sidebarCollapsed", String(newState))
+  }
 
   return (
     <>
+      {/* Mobile menu button */}
       <Button
         variant="ghost"
         size="icon"
@@ -29,17 +46,36 @@ export default function Sidebar() {
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </Button>
 
-      <div
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out md:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-y-0 left-0 z-40 bg-card border-r border-border transition-all duration-200 ease-in-out md:sticky md:top-0 md:h-screen",
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          isCollapsed ? "w-16" : "w-64",
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-border">
+          <div className="p-4 border-b border-border flex justify-between items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold text-xl">Limbus Company</span>
+              {isCollapsed ? (
+                <span className="font-bold text-xl">LC</span>
+              ) : (
+                <span className="font-bold text-xl">Limbus Company</span>
+              )}
             </Link>
+
+            {/* Integrated collapse toggle button */}
+            <Button variant="ghost" size="sm" onClick={toggleCollapse} className="hidden md:flex">
+              {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            </Button>
           </div>
 
           <div className="flex-1 overflow-y-auto py-4">
@@ -55,26 +91,20 @@ export default function Sidebar() {
                       pathname === item.href || pathname.startsWith(`${item.href}/`)
                         ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-primary/5",
+                      isCollapsed ? "justify-center" : "",
                     )}
                     onClick={() => setIsOpen(false)}
+                    title={isCollapsed ? item.name : ""}
                   >
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.name}
+                    <Icon className={cn("h-5 w-5", isCollapsed ? "" : "mr-3")} />
+                    {!isCollapsed && <span>{item.name}</span>}
                   </Link>
                 )
               })}
             </nav>
           </div>
-
-          <div className="p-4 border-t border-border">
-            <Link href="/donate">
-              <Button variant="outline" className="w-full">
-                Donate
-              </Button>
-            </Link>
-          </div>
         </div>
-      </div>
+      </aside>
     </>
   )
 }

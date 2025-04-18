@@ -15,6 +15,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Save, Share2, Trash2, Info, X, LogIn } from "lucide-react"
 
+// EGO categories
+const egoCategories = ["ZAYIN", "TETH", "HE", "WAW"]
+
 // Mock data for Sinners
 const sinners = [
   { id: 1, name: "Yi Sang", rarity: 3, sin: "Wrath", damage: "Slash", image: "/placeholder.svg?height=80&width=80" },
@@ -57,7 +60,7 @@ const egos = [
   {
     id: 1,
     name: "Don't Fear The Reaper",
-    rarity: 2,
+    category: "TETH",
     sin: "Wrath",
     damage: "Slash",
     character: "Yi Sang",
@@ -66,7 +69,7 @@ const egos = [
   {
     id: 2,
     name: "Pale Rider",
-    rarity: 3,
+    category: "HE",
     sin: "Wrath",
     damage: "Slash",
     character: "Yi Sang",
@@ -75,7 +78,7 @@ const egos = [
   {
     id: 3,
     name: "The Crimson Scar",
-    rarity: 3,
+    category: "WAW",
     sin: "Lust",
     damage: "Pierce",
     character: "Faust",
@@ -84,7 +87,7 @@ const egos = [
   {
     id: 4,
     name: "Windmill",
-    rarity: 2,
+    category: "ZAYIN",
     sin: "Pride",
     damage: "Slash",
     character: "Don Quixote",
@@ -93,7 +96,7 @@ const egos = [
   {
     id: 5,
     name: "La Sangre",
-    rarity: 3,
+    category: "HE",
     sin: "Pride",
     damage: "Blunt",
     character: "Don Quixote",
@@ -102,7 +105,7 @@ const egos = [
   {
     id: 6,
     name: "Bamboo Cutter",
-    rarity: 2,
+    category: "TETH",
     sin: "Sloth",
     damage: "Slash",
     character: "Ryōshū",
@@ -111,7 +114,7 @@ const egos = [
   {
     id: 7,
     name: "Moonlight",
-    rarity: 3,
+    category: "WAW",
     sin: "Sloth",
     damage: "Pierce",
     character: "Ryōshū",
@@ -120,7 +123,7 @@ const egos = [
   {
     id: 8,
     name: "Sunshower",
-    rarity: 2,
+    category: "ZAYIN",
     sin: "Gluttony",
     damage: "Blunt",
     character: "Meursault",
@@ -129,7 +132,7 @@ const egos = [
   {
     id: 9,
     name: "Stranger",
-    rarity: 3,
+    category: "HE",
     sin: "Gluttony",
     damage: "Blunt",
     character: "Meursault",
@@ -166,6 +169,7 @@ export default function TeamBuilderPage() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("characters")
+  const [activeEgoCategory, setActiveEgoCategory] = useState("all")
 
   // Filter characters based on search term
   const filteredCharacters = sinners.filter(
@@ -175,13 +179,14 @@ export default function TeamBuilderPage() {
       character.damage.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  // Filter EGOs based on search term
+  // Filter EGOs based on search term and category
   const filteredEgos = egos.filter(
     (ego) =>
-      ego.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ego.character.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ego.sin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ego.damage.toLowerCase().includes(searchTerm.toLowerCase()),
+      (activeEgoCategory === "all" || ego.category === activeEgoCategory) &&
+      (ego.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ego.character.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ego.sin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ego.damage.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
   // Handle character selection
@@ -189,12 +194,12 @@ export default function TeamBuilderPage() {
     if (selectedCharacters.includes(characterId)) {
       setSelectedCharacters(selectedCharacters.filter((id) => id !== characterId))
     } else {
-      if (selectedCharacters.length < 3) {
+      if (selectedCharacters.length < 6) {
         setSelectedCharacters([...selectedCharacters, characterId])
       } else {
         toast({
           title: "Team Limit Reached",
-          description: "You can only select up to 3 characters for your team.",
+          description: "You can only select up to 6 characters for your team.",
           variant: "destructive",
         })
       }
@@ -206,15 +211,25 @@ export default function TeamBuilderPage() {
     if (selectedEgos.includes(egoId)) {
       setSelectedEgos(selectedEgos.filter((id) => id !== egoId))
     } else {
-      if (selectedEgos.length < 3) {
-        setSelectedEgos([...selectedEgos, egoId])
-      } else {
-        toast({
-          title: "E.G.O. Limit Reached",
-          description: "You can only select up to 3 E.G.O. abilities for your team.",
-          variant: "destructive",
-        })
+      // Check if we already have 4 EGOs of this category
+      const ego = egos.find((e) => e.id === egoId)
+      if (ego) {
+        const categoryCount = selectedEgos.filter((id) => {
+          const selectedEgo = egos.find((e) => e.id === id)
+          return selectedEgo && selectedEgo.category === ego.category
+        }).length
+
+        if (categoryCount >= 4) {
+          toast({
+            title: `${ego.category} Limit Reached`,
+            description: `You can only select up to 4 ${ego.category} E.G.O. abilities.`,
+            variant: "destructive",
+          })
+          return
+        }
       }
+
+      setSelectedEgos([...selectedEgos, egoId])
     }
   }
 
@@ -337,6 +352,12 @@ export default function TeamBuilderPage() {
     let slashCount = 0
     let pierceCount = 0
     let bluntCount = 0
+    const categoryCount = {
+      ZAYIN: 0,
+      TETH: 0,
+      HE: 0,
+      WAW: 0,
+    }
 
     selectedCharacters.forEach((id) => {
       const character = getCharacterById(id)
@@ -353,6 +374,9 @@ export default function TeamBuilderPage() {
         if (ego.damage === "Slash") slashCount++
         if (ego.damage === "Pierce") pierceCount++
         if (ego.damage === "Blunt") bluntCount++
+        if (ego.category in categoryCount) {
+          categoryCount[ego.category as keyof typeof categoryCount]++
+        }
       }
     })
 
@@ -360,6 +384,7 @@ export default function TeamBuilderPage() {
       slash: slashCount,
       pierce: pierceCount,
       blunt: bluntCount,
+      categories: categoryCount,
       total: selectedCharacters.length + selectedEgos.length,
       balance:
         (Math.max(slashCount, pierceCount, bluntCount) / (selectedCharacters.length + selectedEgos.length || 1)) * 100,
@@ -381,7 +406,7 @@ export default function TeamBuilderPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Build Your Team</CardTitle>
-                <CardDescription>Select up to 3 characters and 3 E.G.O. abilities for your team</CardDescription>
+                <CardDescription>Select up to 6 characters and E.G.O. abilities for your team</CardDescription>
                 <div className="relative mt-2">
                   <Input
                     placeholder={`Search ${activeTab === "characters" ? "characters" : "E.G.O. abilities"}...`}
@@ -441,6 +466,19 @@ export default function TeamBuilderPage() {
                   </TabsContent>
 
                   <TabsContent value="egos" className="mt-4">
+                    <div className="mb-4">
+                      <TabsList className="w-full grid grid-cols-5">
+                        <TabsTrigger value="all" onClick={() => setActiveEgoCategory("all")}>
+                          All
+                        </TabsTrigger>
+                        {egoCategories.map((category) => (
+                          <TabsTrigger key={category} value={category} onClick={() => setActiveEgoCategory(category)}>
+                            {category}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {filteredEgos.map((ego) => (
                         <div
@@ -462,7 +500,10 @@ export default function TeamBuilderPage() {
                             />
                             <h3 className="font-semibold mt-2 text-center text-sm">{ego.name}</h3>
                             <p className="text-xs text-muted-foreground">{ego.character}</p>
-                            <div className="flex space-x-1 mt-1">
+                            <div className="flex flex-wrap justify-center gap-1 mt-1">
+                              <Badge variant="outline" className="text-xs">
+                                {ego.category}
+                              </Badge>
                               <Badge variant="outline" className="text-xs">
                                 {ego.sin}
                               </Badge>
@@ -568,7 +609,7 @@ export default function TeamBuilderPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold mb-2">Characters ({selectedCharacters.length}/3)</h3>
+                    <h3 className="font-semibold mb-2">Characters ({selectedCharacters.length}/6)</h3>
                     {selectedCharacters.length === 0 ? (
                       <div className="text-center p-4 border border-dashed rounded-lg">
                         <p className="text-muted-foreground">No characters selected</p>
@@ -620,7 +661,7 @@ export default function TeamBuilderPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2">E.G.O. Abilities ({selectedEgos.length}/3)</h3>
+                    <h3 className="font-semibold mb-2">E.G.O. Abilities</h3>
                     {selectedEgos.length === 0 ? (
                       <div className="text-center p-4 border border-dashed rounded-lg">
                         <p className="text-muted-foreground">No E.G.O. abilities selected</p>
@@ -641,7 +682,14 @@ export default function TeamBuilderPage() {
                                 />
                                 <div>
                                   <h4 className="font-semibold text-sm">{ego.name}</h4>
-                                  <p className="text-xs text-muted-foreground">{ego.character}</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {ego.category}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      {ego.damage}
+                                    </Badge>
+                                  </div>
                                 </div>
                               </div>
                               <Button
@@ -676,7 +724,22 @@ export default function TeamBuilderPage() {
                         <span>Blunt Damage:</span>
                         <Badge variant="outline">{teamStats.blunt}</Badge>
                       </div>
-                      <div className="flex justify-between items-center">
+
+                      <div className="pt-2 border-t border-border">
+                        <span className="font-semibold">E.G.O. Categories:</span>
+                        <div className="grid grid-cols-4 gap-2 mt-1">
+                          {egoCategories.map((category) => (
+                            <div key={category} className="flex justify-between items-center">
+                              <span className="text-sm">{category}:</span>
+                              <Badge variant="outline">
+                                {teamStats.categories[category as keyof typeof teamStats.categories]}/4
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center pt-2 border-t border-border">
                         <span>Damage Balance:</span>
                         <Badge
                           variant={
@@ -754,6 +817,12 @@ export default function TeamBuilderPage() {
                     <Info className="h-5 w-5 text-primary mt-0.5" />
                     <p className="text-sm">
                       Match E.G.O. abilities with characters that have high proficiency in that damage type.
+                    </p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <Info className="h-5 w-5 text-primary mt-0.5" />
+                    <p className="text-sm">
+                      Try to include a mix of E.G.O. categories (ZAYIN, TETH, HE, WAW) for versatility.
                     </p>
                   </div>
                 </div>

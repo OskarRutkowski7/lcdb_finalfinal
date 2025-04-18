@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Users, Shield, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "@/lib/react-utils"
+import { useStableCallback } from "@/hooks/use-stable-callback"
 
 // Update the navItems array to only include the requested sections
 const navItems = [
@@ -28,11 +29,11 @@ export default function Sidebar() {
   }, [])
 
   // Save sidebar state to localStorage when it changes
-  const toggleCollapse = () => {
+  const toggleCollapse = useStableCallback(() => {
     const newState = !isCollapsed
     setIsCollapsed(newState)
     localStorage.setItem("sidebarCollapsed", String(newState))
-  }
+  })
 
   return (
     <>

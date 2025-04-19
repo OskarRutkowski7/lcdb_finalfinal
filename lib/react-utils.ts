@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useStableCallback } from "@/hooks/use-stable-callback"
 
 // Re-export all React hooks and functions
 export const {
@@ -21,10 +20,19 @@ export const {
   useInsertionEffect,
   useSyncExternalStore,
   useTransition,
-  // Add any other hooks you might be using
 } = React
 
 // Export our stable implementation as useEffectEvent
-export const useEffectEvent = useStableCallback
+export function useStableCallback<T extends (...args: any[]) => any>(callback: T): T {
+  const callbackRef = React.useRef(callback)
 
-// This file can be imported instead of 'react' to get all React hooks plus our custom ones
+  React.useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
+
+  return React.useCallback((...args: any[]) => {
+    return callbackRef.current(...args)
+  }, []) as T
+}
+
+export const useEffectEvent = useStableCallback

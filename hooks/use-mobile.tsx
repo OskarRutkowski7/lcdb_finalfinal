@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "@/lib/react-utils"
+import * as React from "react"
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = React.useState(false)
 
-  useEffect(() => {
+  React.useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }

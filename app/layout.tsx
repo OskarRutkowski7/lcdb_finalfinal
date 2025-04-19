@@ -5,6 +5,7 @@ import "./globals.css"
 import Sidebar from "@/components/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import AuthProvider from "@/components/auth-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,6 +29,7 @@ export default function RootLayout({
               <Sidebar />
               <main className="flex-1 bg-background w-full">{children}</main>
             </div>
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

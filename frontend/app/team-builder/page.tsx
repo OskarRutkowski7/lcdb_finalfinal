@@ -29,6 +29,32 @@ const egos: EGO[] = []
 // Mock saved teams
 const savedTeams: Team[] = []
 
+interface Character {
+  id: string;
+  name: string;
+  sin: string;
+  damage: string;
+  image?: string;
+}
+
+const getCharacterImageName = (name: string) => {
+  const nameMap: { [key: string]: string } = {
+    "Yi Sang": "LiuYiSang.png",
+    "Faust": "RemnantFaust.png",
+    "Don Quixote": "ManagerDon.png",
+    "Ryoshu": "HaoRyoshu.png",
+    "Meursault": "DieciMersault.png",
+    "Hong Lu": "KcorpHongLu.png",
+    "Heathcliff": "WildhuntHeathcliff.png",
+    "Ishmael": "KurukomoIshmael.png",
+    "Rodion": "DieciRodion.png",
+    "Sinclair": "MiddleSinclair.png",
+    "Outis": "SevenOutis.png",
+    "Gregor": "ZweiGregor.png"
+  };
+  return nameMap[name] || "placeholder.svg";
+};
+
 export default function TeamBuilderPage() {
   const { toast } = useToast()
   const { user, isAuthenticated } = useAuth()
@@ -85,25 +111,23 @@ export default function TeamBuilderPage() {
 
           console.log('Fetching teams with token:', token.substring(0, 10) + '...');
           
-          const teamsResponse = await fetch("http://localhost:3001/api/teams", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          })
-
-          const teamsData = await teamsResponse.json()
-          console.log('Teams response status:', teamsResponse.status);
-          console.log('Teams response data:', teamsData);
-
-          if (!teamsResponse.ok) {
-            const errorMessage = teamsData.error 
-              ? `${teamsData.error}${teamsData.details ? ': ' + teamsData.details : ''}`
-              : "Failed to fetch teams";
-            throw new Error(errorMessage);
+          try {
+            const teamsData = await getTeams();
+            console.log('Teams data received:', teamsData);
+            
+            if (!Array.isArray(teamsData)) {
+              throw new Error('Invalid teams data format received');
+            }
+            
+            setSavedTeamsList(teamsData);
+          } catch (error) {
+            console.error('Error fetching teams:', error);
+            toast({
+              title: "Error",
+              description: "Failed to load saved teams",
+              variant: "destructive"
+            });
           }
-
-          setSavedTeamsList(teamsData)
         }
       } catch (error: any) {
         console.error("Error fetching data:", error)
@@ -258,13 +282,52 @@ export default function TeamBuilderPage() {
 
   // Load team
   const handleLoadTeam = (team: Team) => {
-    setSelectedCharacters(team.characters.map((character) => character.id))
-    setSelectedEgos(team.egos.map((ego) => ({ 
-      egoId: ego.id,
-      sinnerId: ego.characterId
-    })))
-    setTeamName(team.name)
-    setTeamDescription(team.description)
+    try {
+      console.log('Loading team data:', team);
+
+      // Validate team data structure
+      if (!team || typeof team !== 'object') {
+        throw new Error('Invalid team data received');
+      }
+
+      // Check if sinners array exists and is valid (backend uses 'sinners' instead of 'characters')
+      if (!Array.isArray(team.sinners)) {
+        console.error('Invalid sinners data:', team.sinners);
+        throw new Error('Team sinners data is invalid');
+      }
+
+      // Check if egos array exists and is valid
+      if (!Array.isArray(team.egos)) {
+        console.error('Invalid egos data:', team.egos);
+        throw new Error('Team egos data is invalid');
+      }
+
+      // Set the selected characters from the team data (using sinners)
+      setSelectedCharacters(team.sinners.map((sinner: Sinner) => sinner.id))
+      
+      // Set the selected egos from the team data
+      setSelectedEgos(team.egos.map(ego => ({
+        egoId: ego.id,
+        sinnerId: ego.characterId || ego.sinner_id || ego.character?.id || ''
+      })))
+      
+      // Set the team name and description
+      setTeamName(team.name || '')
+      setTeamDescription(team.description || '')
+      
+      // Show success toast
+      toast({
+        title: "Team Loaded",
+        description: `Successfully loaded team "${team.name}"`,
+      })
+    } catch (error) {
+      console.error('Error loading team:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load team",
+        variant: "destructive"
+      })
+    }
   }
 
   // Delete team
@@ -368,108 +431,92 @@ export default function TeamBuilderPage() {
                     <TabsTrigger value="egos">E.G.O. Abilities</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="characters" className="mt-4">
+                  <TabsContent value="characters" className="mt-0">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {filteredCharacters.map((character) => (
-                        <div key={character.id} className="relative">
-                          <Card
-                            className={`cursor-pointer transition-all ${
-                              selectedCharacters.includes(character.id) ? "ring-2 ring-primary" : ""
-                            }`}
-                            onClick={() => toggleCharacterSelection(character.id)}
-                          >
-                            <div className="bg-primary/10 p-3 flex flex-col items-center">
-                              <Image
-                                src={character.image || "/placeholder.svg"}
-                                alt={character.name}
-                                width={80}
-                                height={80}
-                                className="rounded-full"
-                              />
-                              <h3 className="font-semibold mt-2 text-center">{character.name}</h3>
-                              <div className="flex space-x-1 mt-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {character.sin}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {character.damage}
-                                </Badge>
-                              </div>
+                      {filteredCharacters.map((sinner: Sinner) => (
+                        <Card
+                          key={sinner.id}
+                          className={`cursor-pointer hover:border-primary/50 transition-all ${
+                            selectedCharacters.includes(sinner.id) ? "border-primary" : ""
+                          }`}
+                          onClick={() => toggleCharacterSelection(sinner.id)}
+                        >
+                          <div className="relative bg-primary/10 aspect-square">
+                            <Image
+                              src={`/${getCharacterImageName(sinner.name)}`}
+                              alt={sinner.name}
+                              fill
+                              className="object-cover p-2"
+                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                              priority
+                            />
+                          </div>
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold truncate">{sinner.name}</h3>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              <Badge variant="outline">{sinner.sin}</Badge>
+                              <Badge variant="outline">{sinner.damage}</Badge>
                             </div>
-
-                            {selectedCharacters.includes(character.id) && (
-                              <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                                <Check className="h-4 w-4" />
-                              </div>
-                            )}
-                          </Card>
-                        </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="egos" className="mt-4">
-                    <div className="mb-4">
-                      <div className="w-full grid grid-cols-5 gap-2">
+                  <TabsContent value="egos" className="mt-0">
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        variant={activeEgoCategory === "all" ? "default" : "outline"}
+                        onClick={() => setActiveEgoCategory("all")}
+                      >
+                        All
+                      </Button>
+                      {egoCategories.map((category) => (
                         <Button
-                          variant={activeEgoCategory === "all" ? "default" : "outline"}
-                          onClick={() => setActiveEgoCategory("all")}
-                          className="w-full"
+                          key={category}
+                          variant={activeEgoCategory === category ? "default" : "outline"}
+                          onClick={() => setActiveEgoCategory(category)}
                         >
-                          All
+                          {category}
                         </Button>
-                        {egoCategories.map((category) => (
-                          <Button
-                            key={category}
-                            variant={activeEgoCategory === category ? "default" : "outline"}
-                            onClick={() => setActiveEgoCategory(category)}
-                            className="w-full"
-                          >
-                            {category}
-                          </Button>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {filteredEgos.map((ego) => (
-                        <div key={ego.id} className="relative">
-                          <Card
-                            className={`cursor-pointer transition-all ${
-                              selectedEgos.some(selectedEgo => selectedEgo.egoId === ego.id) ? "ring-2 ring-primary" : ""
-                            }`}
-                            onClick={() => toggleEgoSelection(ego.id, ego.characterId)}
-                          >
-                            <div className="bg-primary/10 p-3 flex flex-col items-center">
-                              <Image
-                                src={ego.image || "/placeholder.svg"}
-                                alt={ego.name}
-                                width={80}
-                                height={80}
-                                className="rounded-lg"
-                              />
-                              <h3 className="font-semibold mt-2 text-center text-sm">{ego.name}</h3>
-                              <p className="text-xs text-muted-foreground">{ego.character?.name}</p>
-                              <div className="flex flex-wrap justify-center gap-1 mt-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {ego.category}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {ego.sin}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {ego.damage}
-                                </Badge>
+                        <Card
+                          key={ego.id}
+                          className={`cursor-pointer hover:border-primary/50 transition-all ${
+                            selectedEgos.some(e => e.egoId === ego.id) ? "border-primary" : ""
+                          }`}
+                          onClick={() => toggleEgoSelection(ego.id, ego.character?.id || "")}
+                        >
+                          <div className="relative bg-primary/10 aspect-square">
+                            <Image
+                              src={ego.image}
+                              alt={ego.name}
+                              fill
+                              className="object-cover p-2"
+                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                              priority
+                            />
+                            <div className="absolute top-2 right-2 bg-background/80 rounded-md px-2 py-1">
+                              <div className="flex">
+                                {Array.from({ length: ego.category === "ALEPH" ? 4 : ego.category === "WAW" ? 3 : ego.category === "HE" ? 2 : 1 }).map((_, i) => (
+                                  <span key={i} className="text-yellow-500">★</span>
+                                ))}
                               </div>
                             </div>
-
-                            {selectedEgos.some(selectedEgo => selectedEgo.egoId === ego.id) && (
-                              <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                                <Check className="h-4 w-4" />
-                              </div>
-                            )}
-                          </Card>
-                        </div>
+                          </div>
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold truncate">{ego.name}</h3>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              <Badge variant="outline">{ego.category}</Badge>
+                              <Badge variant="outline">{ego.sin}</Badge>
+                              <Badge variant="outline">{ego.damage}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-2 truncate">{ego.character?.name}</p>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </TabsContent>
@@ -521,21 +568,19 @@ export default function TeamBuilderPage() {
 
                           <div className="mt-4">
                             <div className="grid grid-cols-3 gap-2">
-                              {selectedCharacters.map((characterId) => {
-                                const character = getCharacterById(characterId)
-                                return character ? (
-                                  <div key={character.id} className="text-center">
+                              {team.sinners.map((sinner) => (
+                                <div key={sinner.id} className="text-center">
+                                  <div className="relative w-10 h-10 mx-auto">
                                     <Image
-                                      src={character.image}
-                                      alt={character.name}
-                                      width={40}
-                                      height={40}
-                                      className="mx-auto"
+                                      src={`/${getCharacterImageName(sinner.name)}`}
+                                      alt={sinner.name}
+                                      fill
+                                      className="object-cover rounded-full"
                                     />
-                                    <p className="text-xs mt-1">{character.name}</p>
                                   </div>
-                                ) : null
-                              })}
+                                  <p className="text-xs mt-1">{sinner.name}</p>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </CardContent>
@@ -572,14 +617,15 @@ export default function TeamBuilderPage() {
                               className="flex items-center justify-between bg-primary/10 p-2 rounded-lg"
                             >
                               <div className="flex items-center">
-                                <Image
-                                  src={character.image || "/placeholder.svg"}
-                                  alt={character.name}
-                                  width={40}
-                                  height={40}
-                                  className="rounded-full mr-2"
-                                />
-                                <div>
+                                <div className="relative w-10 h-10">
+                                  <Image
+                                    src={`/${getCharacterImageName(character.name)}`}
+                                    alt={character.name}
+                                    fill
+                                    className="object-cover rounded-full"
+                                  />
+                                </div>
+                                <div className="ml-2">
                                   <h4 className="font-semibold">{character.name}</h4>
                                   <div className="flex space-x-1">
                                     <Badge variant="outline" className="text-xs">
@@ -622,14 +668,15 @@ export default function TeamBuilderPage() {
                           return egoData ? (
                             <div key={selectedEgo.egoId} className="flex items-center justify-between bg-primary/10 p-2 rounded-lg">
                               <div className="flex items-center">
-                                <Image
-                                  src={egoData.image}
-                                  alt={egoData.name}
-                                  width={40}
-                                  height={40}
-                                  className="rounded-lg mr-2"
-                                />
-                                <div>
+                                <div className="relative w-10 h-10">
+                                  <Image
+                                    src={egoData.image}
+                                    alt={egoData.name}
+                                    fill
+                                    className="object-cover rounded-lg"
+                                  />
+                                </div>
+                                <div className="ml-2">
                                   <p className="font-semibold">{egoData.name}</p>
                                   <p className="text-sm text-muted-foreground">{sinnerData?.name || 'Unknown'}</p>
                                 </div>

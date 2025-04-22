@@ -1,722 +1,892 @@
-// Make sure we're exporting the sinnerData object as default
-export type Sinner = {
-  id: number
-  name: string
-  title: string
-  rarity: number
-  sin: string
-  damage: string
-  image: string
-  description: string
-  background: string
-  stats: {
-    hp: number
-    stagger: number
-    speed: string
-    defense: number
-    slash: number
-    pierce: number
-    blunt: number
-    resistances: {
-      slash: string
-      pierce: string
-      blunt: string
-    }
-    staggerThreshold: {
-      slash: string
-      pierce: string
-      blunt: string
-    }
-  }
-  skills: Array<{
-    name: string
-    description: string
-    coinCount: number
-    type: string
-    power: string
-    multiplier: string
-    coinPower: {
-      normal: number
-      success: number
-      great: number
-    }
-    effects: string[]
-    image: string
-  }>
-  passives: Array<{
-    name: string
-    description: string
-  }>
-  sanity: {
-    name: string
-    description: string
-    effects: string[]
-  }
-  egos: Array<{
-    name: string
-    description: string
-    rarity: number
-    image: string
-  }>
-  teamSynergies: Array<{
-    name: string
-    sinners: number[]
-    description: string
-  }>
+export interface Skill {
+  name: string;
+  description: string;
+  type: string;
+  damage: string;
+  cost: number;
+  uses: number;
+  coinPower: {
+    normal: number;
+    clash: number;
+    counter: number;
+  };
+  effects: string[];
 }
 
-export const getSinnerById = (id: number): Sinner | undefined => {
-  return sinnerData[id]
+export interface Stats {
+  hp: number;
+  def: number;
+  speed: number;
+  minDmg: number;
+  maxDmg: number;
+  resistances: {
+    slash: number;
+    pierce: number;
+    blunt: number;
+  };
+  staggerThreshold: {
+    slash: number;
+    pierce: number;
+    blunt: number;
+  };
 }
 
-export const getAllSinners = (): Sinner[] => {
-  return Object.values(sinnerData)
+export interface Ego {
+  name: string;
+  description: string;
+  category: string;
+  damage: string;
 }
 
-// Mock data for Sinners with detailed information
-const sinnerData: Record<number, Sinner> = {
-  1: {
-    id: 1,
+export interface SinnerData {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  image: string;
+  rarity: number;
+  sin: string;
+  releaseDate: string;
+  statuses: string[];
+  stats: Stats;
+  skills: Skill[];
+  egos: Ego[];
+  tags: string[];
+  passives: string[];
+  sanitySkills: string[];
+}
+
+export const sinnersData: Record<string, SinnerData> = {
+  "1": {
+    id: "1",
     name: "Yi Sang",
     title: "Liu Assoc. South Section 3",
+    description: "A former member of the Liu Association who wields flame-based abilities.",
+    image: "/LiuYiSang.png",
     rarity: 3,
     sin: "Wrath",
-    damage: "Slash",
-    image: "/placeholder.svg?height=300&width=300",
-    description:
-      "A writer who plagiarized others' works. He was caught and sentenced to death, but was saved by the Head Manager and brought to the Limbus Company.",
-    background:
-      "Yi Sang was once a renowned writer whose works captivated readers across the City. However, his success was built on deception - he plagiarized the works of others, claiming them as his own. When his fraud was discovered, he was sentenced to death. The Head Manager of Limbus Company saw potential in his cunning and offered him a position as a Sinner, sparing his life but binding him to the company's mysterious goals.",
+    releaseDate: "2023-02-23",
+    statuses: ["Burn"],
     stats: {
       hp: 203,
-      stagger: 132,
-      speed: "4-6",
-      defense: 52,
-      slash: 90,
-      pierce: 60,
-      blunt: 40,
+      def: 52,
+      speed: 4,
+      minDmg: 42,
+      maxDmg: 58,
       resistances: {
-        slash: "x2",
-        pierce: "x1",
-        blunt: "x0.5",
+        slash: 0.8,
+        pierce: 1.0,
+        blunt: 1.2
       },
       staggerThreshold: {
-        slash: "132 (65%)",
-        pierce: "71 (35%)",
-        blunt: "30 (15%)",
-      },
+        slash: 25,
+        pierce: 25,
+        blunt: 25
+      }
     },
     skills: [
       {
         name: "Flame Row",
         description: "Deal Slash damage to a single target. Apply Burn status.",
-        coinCount: 3,
         type: "Slash",
-        power: "+4",
-        multiplier: "x3",
+        damage: "Slash",
+        cost: 2,
+        uses: 3,
         coinPower: {
-          normal: 15,
-          success: 52,
-          great: 23,
+          normal: 3,
+          clash: 2,
+          counter: 4
         },
-        effects: [
-          "+1 Coin Power for every 3 Burn on the target (max 2)",
-          "Deal +10% more damage for every 10 Burn on the target (max 30%)",
-          "Inflict 1 Burn",
-          "Inflict 1 Burn",
-          "Inflict 1 Burn",
-          "Inflict 1 Burn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
+        effects: ["Apply Burn (2 turns)", "Deal 1.2x damage to Burned targets"]
       },
       {
         name: "Frontal Assault",
-        description:
-          "Deal Slash damage to a single target and apply additional Burn status if target already has Burn.",
-        coinCount: 4,
+        description: "Deal Slash damage to a single target and apply additional Burn status if target already has Burn.",
         type: "Slash",
-        power: "+4",
-        multiplier: "x2",
+        damage: "Slash",
+        cost: 3,
+        uses: 2,
         coinPower: {
-          normal: 19,
-          success: 53,
-          great: 47,
+          normal: 4,
+          clash: 3,
+          counter: 5
         },
-        effects: [
-          "+1 Coin Power for every 6 Burn on the target (max 2)",
-          "Inflict 2 Burn",
-          "Inflict 2 Burn",
-          "Deal +5% more damage for every 9 Burn on the target (max 60%)",
-          "If the target has 6+ Burn, inflict +2 Burn Count on the target",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Flow of the Sword",
-        description: "Deal massive Slash damage to a single target and heal allies based on damage dealt.",
-        coinCount: 4,
-        type: "Slash",
-        power: "+3",
-        multiplier: "x1",
-        coinPower: {
-          normal: 18,
-          success: 54,
-          great: 61,
-        },
-        effects: [
-          "+1 Coin Power for every 8 Burn on the target (max 2)",
-          "Deal +10% more damage for every 6 Burn on the target (max 30%)",
-          "Heal 15 SP for 1 other ally with the least SP",
-          "If this attack killed the target, or if the main target has 8+ Burn, heal 1 more ally",
-          "Inflict 1 Burn",
-          "Inflict 1 Burn",
-          "Inflict 2 Burn",
-          "Deal +2% more damage for every 9 Burn on the target (max 60%)",
-          "Inflict Wrath Affinity damage equal to Burn Potency on the target (max 30) Reduce Target's Burn Count by 2",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Flame Counter",
-        description: "Defensive skill that counters attacks with Burn effects.",
-        coinCount: 5,
-        type: "Defense",
-        power: "+3",
-        multiplier: "",
-        coinPower: {
-          normal: 0,
-          success: 0,
-          great: 0,
-        },
-        effects: [
-          "When hit, apply 2 Burn to the attacker",
-          "Reduce incoming damage by 15% for each Burn on the attacker (max 45%)",
-          "Counter with Slash damage equal to 50% of the damage received",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
+        effects: ["Apply Burn (2 turns) if target is already Burned"]
+      }
     ],
-    passives: [
-      {
-        name: "Burning Passion",
-        description: "Increase Burn damage by 20%. Gain 1 Burn Potency for every 5 Burn inflicted.",
-      },
-      {
-        name: "Flame Affinity",
-        description: "Start battle with 10 Burn Potency. Burn effects deal 10% more damage.",
-      },
-    ],
-    sanity: {
-      name: "Plagiarist's Guilt",
-      description: "When Sanity is below 50%, gain +20% Slash damage but take 5% more damage from all sources.",
-      effects: [
-        "Low Sanity: +20% Slash damage, +5% damage taken",
-        "Critical Sanity: +30% Slash damage, +15% damage taken, -10% defense",
-      ],
-    },
     egos: [
-      {
-        name: "Don't Fear The Reaper",
-        description: "Increase Slash damage by 30% for 3 turns. Gain immunity to Stagger for 2 turns.",
-        rarity: 2,
-        image: "/placeholder.svg?height=80&width=80",
-      },
       {
         name: "Pale Rider",
-        description:
-          "Deal massive Slash damage to all enemies. Has a 30% chance to instantly kill targets below 25% HP.",
-        rarity: 3,
-        image: "/placeholder.svg?height=80&width=80",
-      },
+        description: "A manifestation of Yi Sang's inner turmoil. This E.G.O. grants immense power at the cost of sanity.",
+        category: "WAW",
+        damage: "Slash"
+      }
     ],
-    teamSynergies: [
-      {
-        name: "Wrath Duo",
-        sinners: [1, 6],
-        description: "When Yi Sang and Hong Lu are in the same team, both gain +15% damage with Slash attacks.",
-      },
-      {
-        name: "Liu Association",
-        sinners: [1, 3, 8],
-        description: "When 3 or more Liu Association members are in the team, all gain +10% max HP and +5% defense.",
-      },
-    ],
+    tags: ["Burn", "DPS"],
+    passives: ["Burning Passion: Increase damage by 20% against Burned targets"],
+    sanitySkills: ["Flame Mastery: All attacks have a 30% chance to apply Burn"]
   },
-  2: {
-    id: 2,
+  "2": {
+    id: "2",
     name: "Faust",
     title: "The Lobotomy Corp Remnant",
+    description: "A mysterious figure with ties to the Lobotomy Corporation, specializing in pierce damage and status effects.",
+    image: "/RemnantFaust.png",
     rarity: 3,
     sin: "Lust",
-    damage: "Pierce",
-    image: "/placeholder.svg?height=300&width=300",
-    description:
-      "A former researcher from Lobotomy Corporation who experimented with human desires. Now uses her knowledge to manipulate the emotions of others.",
-    background:
-      "Faust was once a brilliant researcher at Lobotomy Corporation, where she conducted experiments on human desires and emotions. Her research crossed ethical boundaries, leading to her dismissal. The Head Manager recruited her for her unique understanding of human psychology and her ability to manipulate emotions. As a Sinner, she continues her research while serving the company's goals.",
+    releaseDate: "2023-02-23",
+    statuses: ["Bleed", "Paralysis"],
     stats: {
       hp: 185,
-      stagger: 145,
-      speed: "5-7",
-      defense: 45,
-      slash: 50,
-      pierce: 95,
-      blunt: 55,
+      def: 45,
+      speed: 5,
+      minDmg: 38,
+      maxDmg: 52,
       resistances: {
-        slash: "x0.5",
-        pierce: "x2",
-        blunt: "x1",
+        slash: 1.0,
+        pierce: 0.8,
+        blunt: 1.2
       },
       staggerThreshold: {
-        slash: "36 (25%)",
-        pierce: "116 (80%)",
-        blunt: "58 (40%)",
-      },
+        slash: 25,
+        pierce: 20,
+        blunt: 30
+      }
     },
     skills: [
       {
-        name: "Temptation",
-        description: "Deal Pierce damage to a single target and apply Charm status.",
-        coinCount: 3,
+        name: "Surgical Strike",
+        description: "Deal Pierce damage and apply Bleed to a single target.",
         type: "Pierce",
-        power: "+3",
-        multiplier: "x2",
+        damage: "Pierce",
+        cost: 2,
+        uses: 3,
         coinPower: {
-          normal: 18,
-          success: 55,
-          great: 27,
+          normal: 3,
+          clash: 3,
+          counter: 4
         },
-        effects: [
-          "+1 Coin Power for every 2 Charm on the target (max 3)",
-          "Inflict 2 Charm",
-          "Inflict 1 Charm",
-          "If target has 5+ Charm, gain +20% damage for this attack",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
+        effects: ["Apply Bleed (3 turns)"]
       },
       {
-        name: "Seductive Strike",
-        description: "Deal Pierce damage to all enemies and apply Charm status.",
-        coinCount: 4,
+        name: "Neural Shock",
+        description: "Deal Pierce damage with a chance to Paralyze the target.",
         type: "Pierce",
-        power: "+4",
-        multiplier: "x1",
+        damage: "Pierce",
+        cost: 3,
+        uses: 2,
         coinPower: {
-          normal: 20,
-          success: 48,
-          great: 32,
+          normal: 4,
+          clash: 2,
+          counter: 5
         },
-        effects: [
-          "Inflict 1 Charm to all enemies",
-          "For each enemy with 3+ Charm, heal self for 10% of damage dealt",
-          "If 3 or more enemies have Charm, gain +1 Speed next turn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Forbidden Knowledge",
-        description: "Deal massive Pierce damage to a single target based on their Charm level.",
-        coinCount: 5,
-        type: "Pierce",
-        power: "+5",
-        multiplier: "x2",
-        coinPower: {
-          normal: 15,
-          success: 60,
-          great: 25,
-        },
-        effects: [
-          "Deal +15% damage for each Charm on the target (max 75%)",
-          "Remove all Charm from the target",
-          "For each Charm removed, gain 5% damage reduction for 2 turns",
-          "If this attack kills the target, reduce all skill cooldowns by 1",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Emotional Barrier",
-        description: "Defensive skill that redirects damage based on Charm levels.",
-        coinCount: 4,
-        type: "Defense",
-        power: "+3",
-        multiplier: "",
-        coinPower: {
-          normal: 0,
-          success: 0,
-          great: 0,
-        },
-        effects: [
-          "Reduce incoming damage by 10% for each enemy with Charm (max 50%)",
-          "If attacker has Charm, redirect 30% of damage back to attacker",
-          "Apply 2 Charm to the attacker",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
+        effects: ["50% chance to apply Paralysis (1 turn)"]
+      }
     ],
-    passives: [
-      {
-        name: "Emotional Manipulation",
-        description: "Increase Charm duration by 1 turn. Enemies with Charm deal 15% less damage to Faust.",
-      },
-      {
-        name: "Desire's Embrace",
-        description:
-          "Start battle with +20% Pierce damage. Each time an enemy with Charm attacks, gain +5% Pierce damage (max 50%).",
-      },
-    ],
-    sanity: {
-      name: "Researcher's Obsession",
-      description: "When Sanity is below 50%, Charm effects are 25% more potent but take 10% more Pierce damage.",
-      effects: [
-        "Low Sanity: +25% Charm potency, +10% Pierce damage taken",
-        "Critical Sanity: +40% Charm potency, +20% Pierce damage taken, -15% defense",
-      ],
-    },
     egos: [
       {
-        name: "The Crimson Scar",
-        description: "Deal massive Pierce damage to a single target and heal for 50% of damage dealt.",
-        rarity: 3,
-        image: "/placeholder.svg?height=80&width=80",
-      },
-      {
-        name: "Scarlet Desire",
-        description: "Apply Charm to all enemies and gain +30% damage against Charmed targets for 3 turns.",
-        rarity: 2,
-        image: "/placeholder.svg?height=80&width=80",
-      },
+        name: "White Night",
+        description: "A powerful E.G.O. that channels the essence of the Lobotomy Corporation's experiments.",
+        category: "ALEPH",
+        damage: "Pierce"
+      }
     ],
-    teamSynergies: [
-      {
-        name: "Emotional Resonance",
-        sinners: [2, 7],
-        description:
-          "When Faust and Heathcliff are in the same team, status effects applied by either last 1 turn longer.",
-      },
-      {
-        name: "Scientific Minds",
-        sinners: [2, 5, 11],
-        description: "When teamed with other researchers, all gain +15% skill effectiveness.",
-      },
-    ],
+    tags: ["Control", "DPS"],
+    passives: ["Surgical Precision: Pierce attacks ignore 20% of target's defense"],
+    sanitySkills: ["Mind Control: Chance to apply Paralysis on hit"]
   },
-  3: {
-    id: 3,
+  "3": {
+    id: "3",
     name: "Don Quixote",
-    title: "The Knight of Ruination",
+    title: "The Manager of La Manchaland",
+    description: "A delusional yet powerful warrior who sees himself as a noble knight.",
+    image: "/ManagerDon.png",
     rarity: 3,
     sin: "Pride",
-    damage: "Slash",
-    image: "/placeholder.svg?height=300&width=300",
-    description:
-      "A delusional knight who believes he is fighting for justice and honor. His unwavering conviction makes him a formidable warrior despite his madness.",
-    background:
-      "Don Quixote was once a respected knight who served a noble house. After witnessing the corruption and injustice of the nobility, his mind fractured, creating an alternate reality where he fights against imaginary evils. The Head Manager recruited him for his unwavering conviction and combat prowess, finding his delusions useful for the company's purposes.",
+    releaseDate: "2023-02-23",
+    statuses: ["Guard", "Strength"],
     stats: {
       hp: 220,
-      stagger: 150,
-      speed: "3-5",
-      defense: 65,
-      slash: 85,
-      pierce: 45,
-      blunt: 70,
+      def: 60,
+      speed: 3,
+      minDmg: 45,
+      maxDmg: 65,
       resistances: {
-        slash: "x1.5",
-        pierce: "x0.5",
-        blunt: "x1",
+        slash: 0.7,
+        pierce: 1.1,
+        blunt: 1.0
       },
       staggerThreshold: {
-        slash: "112 (75%)",
-        pierce: "30 (20%)",
-        blunt: "75 (50%)",
-      },
+        slash: 30,
+        pierce: 25,
+        blunt: 25
+      }
     },
     skills: [
       {
-        name: "Windmill",
-        description: "Deal Slash damage to all enemies in a wide arc.",
-        coinCount: 3,
+        name: "Chivalrous Strike",
+        description: "A powerful slash attack that can grant Guard status.",
         type: "Slash",
-        power: "+3",
-        multiplier: "x2",
+        damage: "Slash",
+        cost: 2,
+        uses: 3,
         coinPower: {
-          normal: 16,
-          success: 48,
-          great: 36,
+          normal: 4,
+          clash: 3,
+          counter: 5
         },
-        effects: [
-          "Deal +10% damage for each enemy targeted (max 40%)",
-          "If 3 or more enemies are hit, gain +1 Protection for 2 turns",
-          "Enemies hit have -10% defense for 2 turns",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
+        effects: ["30% chance to gain Guard (2 turns)"]
       },
       {
-        name: "Knight's Challenge",
-        description: "Deal Slash damage to a single target and taunt them.",
-        coinCount: 2,
+        name: "Windmill Charge",
+        description: "Charge at the enemy while spinning, dealing multiple hits.",
         type: "Slash",
-        power: "+2",
-        multiplier: "x3",
+        damage: "Slash",
+        cost: 4,
+        uses: 2,
         coinPower: {
-          normal: 12,
-          success: 45,
-          great: 43,
+          normal: 5,
+          clash: 4,
+          counter: 6
         },
-        effects: [
-          "Target is Taunted for 2 turns (forced to attack Don Quixote)",
-          "Gain +2 Protection",
-          "If already Taunting an enemy, gain +30% damage for this attack",
-          "If this attack staggers the target, extend Taunt duration by 1 turn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "La Sangre",
-        description: "Deal massive Blunt damage to a single target with a chance to stagger.",
-        coinCount: 5,
-        type: "Blunt",
-        power: "+5",
-        multiplier: "x2",
-        coinPower: {
-          normal: 14,
-          success: 58,
-          great: 28,
-        },
-        effects: [
-          "+50% stagger damage",
-          "If target is Taunted, +100% stagger damage",
-          "If this attack staggers the target, gain +3 Protection",
-          "After using this skill, gain +20% damage reduction for 1 turn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Steadfast Defense",
-        description: "Defensive skill that reduces damage and counters attacks.",
-        coinCount: 3,
-        type: "Defense",
-        power: "+4",
-        multiplier: "",
-        coinPower: {
-          normal: 0,
-          success: 0,
-          great: 0,
-        },
-        effects: [
-          "Reduce incoming damage by 40%",
-          "Gain +2 Protection",
-          "Counter with Slash damage equal to 40% of the damage received",
-          "If attacker is Taunted, counter damage is increased to 60%",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
+        effects: ["Hit 2-3 times", "Each hit has reduced power"]
+      }
     ],
-    passives: [
-      {
-        name: "Chivalrous Spirit",
-        description:
-          "Start battle with +2 Protection. When an ally falls below 30% HP, gain +1 Protection and +20% damage for 2 turns.",
-      },
-      {
-        name: "Delusional Courage",
-        description: "Immune to Fear effects. When Taunting an enemy, gain +15% damage reduction against that enemy.",
-      },
-    ],
-    sanity: {
-      name: "Knight's Madness",
-      description:
-        "When Sanity is below 50%, gain +25% damage but lose the ability to distinguish between allies and enemies (5% chance to attack allies).",
-      effects: [
-        "Low Sanity: +25% damage, 5% chance to attack allies",
-        "Critical Sanity: +40% damage, 15% chance to attack allies, -20% accuracy",
-      ],
-    },
     egos: [
       {
-        name: "Windmill",
-        description: "Deal Slash damage to all enemies and apply Taunt to 2 random enemies.",
-        rarity: 2,
-        image: "/placeholder.svg?height=80&width=80",
-      },
-      {
-        name: "La Sangre",
-        description: "Deal massive Blunt damage to a single target with 100% increased stagger damage.",
-        rarity: 3,
-        image: "/placeholder.svg?height=80&width=80",
-      },
+        name: "Knight of La Mancha",
+        description: "Don Quixote's ultimate delusion manifested as power.",
+        category: "WAW",
+        damage: "Slash"
+      }
     ],
-    teamSynergies: [
-      {
-        name: "Protectors",
-        sinners: [3, 10],
-        description:
-          "When Don Quixote and Sinclair are in the same team, both gain +2 Protection at the start of battle.",
-      },
-      {
-        name: "Liu Association",
-        sinners: [1, 3, 8],
-        description: "When 3 or more Liu Association members are in the team, all gain +10% max HP and +5% defense.",
-      },
-    ],
+    tags: ["Tank", "DPS"],
+    passives: ["Chivalrous Spirit: Gain Strength when using Guard"],
+    sanitySkills: ["Delusional Courage: Increased resistance while at low HP"]
   },
-  4: {
-    id: 4,
+  "4": {
+    id: "4",
     name: "Ryōshū",
     title: "The Kaguya of Moonlight",
+    description: "A graceful warrior who harnesses the power of moonlight in combat.",
+    image: "/HaoRyoshu.png",
     rarity: 3,
     sin: "Sloth",
-    damage: "Slash",
-    image: "/placeholder.svg?height=300&width=300",
-    description:
-      "A serene warrior who moves with the grace of moonlight. Her calm demeanor hides a deadly precision with her blade.",
-    background:
-      "Ryōshū was once a renowned swordswoman who served as a personal guard to a high-ranking official. After failing to prevent an assassination, she retreated into isolation, perfecting her art while battling her guilt. The Head Manager found her and offered her redemption through service to the Limbus Company, promising that her skills would protect many lives.",
+    releaseDate: "2023-03-09",
+    statuses: ["Moonlight", "Evade"],
     stats: {
-      hp: 190,
-      stagger: 125,
-      speed: "6-8",
-      defense: 48,
-      slash: 92,
-      pierce: 65,
-      blunt: 43,
+      hp: 175,
+      def: 48,
+      speed: 6,
+      minDmg: 40,
+      maxDmg: 55,
       resistances: {
-        slash: "x1.5",
-        pierce: "x1",
-        blunt: "x0.5",
+        slash: 0.9,
+        pierce: 0.9,
+        blunt: 1.2
       },
       staggerThreshold: {
-        slash: "94 (75%)",
-        pierce: "50 (40%)",
-        blunt: "25 (20%)",
-      },
+        slash: 22,
+        pierce: 22,
+        blunt: 28
+      }
     },
     skills: [
       {
-        name: "Bamboo Cutter",
-        description: "Deal precise Slash damage to a single target with increased critical chance.",
-        coinCount: 2,
+        name: "Moonlight Slash",
+        description: "A graceful slash empowered by moonlight.",
         type: "Slash",
-        power: "+3",
-        multiplier: "x2",
+        damage: "Slash",
+        cost: 2,
+        uses: 3,
         coinPower: {
-          normal: 14,
-          success: 56,
-          great: 30,
+          normal: 3,
+          clash: 4,
+          counter: 4
         },
-        effects: [
-          "+20% critical hit chance",
-          "On critical hit, apply Bleed (2) to the target",
-          "If target has Bleed, +15% damage",
-          "After using this skill, gain +1 Speed for 1 turn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
+        effects: ["Gain Moonlight status (2 turns)", "Bonus damage under Moonlight"]
       },
       {
-        name: "Moonlit Slash",
-        description: "Deal Slash damage to all enemies in a line.",
-        coinCount: 3,
+        name: "Lunar Dance",
+        description: "A defensive technique that grants evasion.",
         type: "Slash",
-        power: "+3",
-        multiplier: "x2",
+        damage: "Slash",
+        cost: 3,
+        uses: 2,
         coinPower: {
-          normal: 16,
-          success: 52,
-          great: 32,
+          normal: 3,
+          clash: 5,
+          counter: 4
         },
-        effects: [
-          "Ignore 20% of target's defense",
-          "Apply Bleed (1) to all targets hit",
-          "For each target with Bleed, gain 5% damage reduction for 1 turn (max 25%)",
-          "If 3 or more targets are hit, reduce this skill's cooldown by 1",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Moonlight",
-        description: "Deal massive Pierce damage to a single target, with bonus effects based on Speed.",
-        coinCount: 4,
-        type: "Pierce",
-        power: "+4",
-        multiplier: "x3",
-        coinPower: {
-          normal: 12,
-          success: 60,
-          great: 28,
-        },
-        effects: [
-          "Deal bonus damage equal to 10% of Ryōshū's Speed",
-          "Apply Bleed (3) to the target",
-          "If Ryōshū's Speed is higher than the target's, gain an extra action this turn",
-          "After using this skill, -1 Speed for 1 turn",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        name: "Serene Stance",
-        description: "Defensive skill that increases evasion and counter chance.",
-        coinCount: 2,
-        type: "Defense",
-        power: "+2",
-        multiplier: "",
-        coinPower: {
-          normal: 0,
-          success: 0,
-          great: 0,
-        },
-        effects: [
-          "+30% evasion chance for 1 turn",
-          "If attack is evaded, counter with Slash damage (x1.5)",
-          "Gain +2 Speed for 1 turn",
-          "Clear all negative status effects",
-        ],
-        image: "/placeholder.svg?height=50&width=50",
-      },
+        effects: ["Gain Evade (1 turn)", "Bonus speed under Moonlight"]
+      }
     ],
-    passives: [
-      {
-        name: "Moonlit Grace",
-        description: "Start battle with +2 Speed. When evading an attack, gain +1 Speed for 1 turn.",
-      },
-      {
-        name: "Flowing Blood",
-        description:
-          "Bleed effects deal 25% more damage. When attacking a bleeding target, gain +10% critical hit chance.",
-      },
-    ],
-    sanity: {
-      name: "Tranquil Madness",
-      description: "When Sanity is below 50%, gain +30% Speed but lose 15% defense.",
-      effects: ["Low Sanity: +30% Speed, -15% defense", "Critical Sanity: +50% Speed, -30% defense, +20% damage taken"],
-    },
     egos: [
       {
-        name: "Bamboo Cutter",
-        description: "Increase Speed by 2 and apply Bleed to all enemies.",
-        rarity: 2,
-        image: "/placeholder.svg?height=80&width=80",
-      },
-      {
-        name: "Moonlight",
-        description: "Deal massive Pierce damage to a single target and gain an extra action if the target is killed.",
-        rarity: 3,
-        image: "/placeholder.svg?height=80&width=80",
-      },
+        name: "Lunar Princess",
+        description: "The embodiment of pure moonlight energy.",
+        category: "WAW",
+        damage: "Slash"
+      }
     ],
-    teamSynergies: [
-      {
-        name: "Swift Justice",
-        sinners: [4, 9],
-        description: "When Ryōshū and Rodion are in the same team, both gain +1 Speed and +10% critical hit chance.",
-      },
-      {
-        name: "Sloth's Paradox",
-        sinners: [4, 11],
-        description: "When paired with another Sloth sinner, both gain +20% evasion chance.",
-      },
-    ],
+    tags: ["Evasion", "DPS"],
+    passives: ["Moonlit Grace: Increased evasion under Moonlight"],
+    sanitySkills: ["Lunar Blessing: Chance to gain Moonlight status when attacked"]
   },
-}
+  "5": {
+    id: "5",
+    name: "Meursault",
+    title: "The Outis Executioner",
+    description: "A cold and calculating executioner who specializes in blunt trauma.",
+    image: "/DieciMersault.png",
+    rarity: 3,
+    sin: "Gluttony",
+    releaseDate: "2023-03-23",
+    statuses: ["Stagger", "Break"],
+    stats: {
+      hp: 195,
+      def: 55,
+      speed: 3,
+      minDmg: 48,
+      maxDmg: 68,
+      resistances: {
+        slash: 1.1,
+        pierce: 1.1,
+        blunt: 0.8
+      },
+      staggerThreshold: {
+        slash: 28,
+        pierce: 28,
+        blunt: 22
+      }
+    },
+    skills: [
+      {
+        name: "Executioner's Strike",
+        description: "A powerful blow that can break enemy defenses.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 3,
+        uses: 3,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Chance to Break enemy defense", "Bonus damage to Staggered targets"]
+      },
+      {
+        name: "Crushing Blow",
+        description: "A devastating attack that guarantees Stagger.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 4,
+        uses: 2,
+        coinPower: {
+          normal: 5,
+          clash: 4,
+          counter: 6
+        },
+        effects: ["Apply Stagger (2 turns)", "Ignore partial defense"]
+      }
+    ],
+    egos: [
+      {
+        name: "The Stranger",
+        description: "A manifestation of Meursault's detached nature.",
+        category: "WAW",
+        damage: "Blunt"
+      }
+    ],
+    tags: ["Tank", "Control"],
+    passives: ["Merciless: Increased damage against Staggered enemies"],
+    sanitySkills: ["Cold Efficiency: Chance to apply Break on hit"]
+  },
+  "6": {
+    id: "6",
+    name: "Hong Lu",
+    title: "The Crimson Axe",
+    description: "A fierce warrior from K Corp who excels in aggressive combat.",
+    image: "/KcorpHongLu.png",
+    rarity: 3,
+    sin: "Wrath",
+    releaseDate: "2023-04-06",
+    statuses: ["Rage", "Bleed"],
+    stats: {
+      hp: 190,
+      def: 45,
+      speed: 4,
+      minDmg: 46,
+      maxDmg: 62,
+      resistances: {
+        slash: 0.8,
+        pierce: 1.1,
+        blunt: 1.1
+      },
+      staggerThreshold: {
+        slash: 24,
+        pierce: 26,
+        blunt: 26
+      }
+    },
+    skills: [
+      {
+        name: "Crimson Slash",
+        description: "A powerful slash that causes bleeding.",
+        type: "Slash",
+        damage: "Slash",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Apply Bleed (2 turns)", "Gain Rage on hit"]
+      },
+      {
+        name: "Berserker Rush",
+        description: "A frenzied attack that increases in power with Rage.",
+        type: "Slash",
+        damage: "Slash",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 5,
+          clash: 4,
+          counter: 6
+        },
+        effects: ["Bonus damage per stack of Rage", "Consume Rage for extra damage"]
+      }
+    ],
+    egos: [
+      {
+        name: "Crimson Warrior",
+        description: "The embodiment of Hong Lu's battlefield fury.",
+        category: "WAW",
+        damage: "Slash"
+      }
+    ],
+    tags: ["DPS", "Berserker"],
+    passives: ["Battle Fury: Gain Rage when taking damage"],
+    sanitySkills: ["Bloodlust: Heal when causing Bleed"]
+  },
+  "7": {
+    id: "7",
+    name: "Heathcliff",
+    title: "The Vengeful One",
+    description: "A powerful fighter driven by revenge and dark emotions.",
+    image: "/WildhuntHeathcliff.png",
+    rarity: 3,
+    sin: "Envy",
+    releaseDate: "2023-04-20",
+    statuses: ["Vengeance", "Strength"],
+    stats: {
+      hp: 200,
+      def: 50,
+      speed: 4,
+      minDmg: 44,
+      maxDmg: 60,
+      resistances: {
+        slash: 1.0,
+        pierce: 1.0,
+        blunt: 1.0
+      },
+      staggerThreshold: {
+        slash: 25,
+        pierce: 25,
+        blunt: 25
+      }
+    },
+    skills: [
+      {
+        name: "Vengeful Strike",
+        description: "A powerful attack that gains strength from damage taken.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Gain Vengeance stack on hit", "Bonus damage per Vengeance stack"]
+      },
+      {
+        name: "Dark Retribution",
+        description: "Channel accumulated vengeance into a devastating attack.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 4,
+        uses: 2,
+        coinPower: {
+          normal: 5,
+          clash: 4,
+          counter: 6
+        },
+        effects: ["Consume Vengeance stacks for massive damage", "Gain Strength"]
+      }
+    ],
+    egos: [
+      {
+        name: "Wuthering Heights",
+        description: "A manifestation of Heathcliff's dark passions.",
+        category: "WAW",
+        damage: "Blunt"
+      }
+    ],
+    tags: ["DPS", "Counter"],
+    passives: ["Vengeful Spirit: Gain Vengeance when taking damage"],
+    sanitySkills: ["Dark Resolve: Convert damage taken to Strength"]
+  },
+  "8": {
+    id: "8",
+    name: "Ishmael",
+    title: "The White Whale Hunter",
+    description: "A skilled hunter who excels in pierce attacks and pursuit tactics.",
+    image: "/KurukomoIshmael.png",
+    rarity: 3,
+    sin: "Gluttony",
+    releaseDate: "2023-05-04",
+    statuses: ["Mark", "Focus"],
+    stats: {
+      hp: 180,
+      def: 45,
+      speed: 5,
+      minDmg: 40,
+      maxDmg: 58,
+      resistances: {
+        slash: 1.1,
+        pierce: 0.8,
+        blunt: 1.1
+      },
+      staggerThreshold: {
+        slash: 26,
+        pierce: 22,
+        blunt: 26
+      }
+    },
+    skills: [
+      {
+        name: "Hunter's Mark",
+        description: "Mark a target for increased damage.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 3,
+          clash: 4,
+          counter: 4
+        },
+        effects: ["Apply Mark (3 turns)", "Gain Focus"]
+      },
+      {
+        name: "Harpoon Strike",
+        description: "A powerful pierce attack against marked targets.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 5,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Double damage against Marked targets", "Consume Focus for guaranteed critical"]
+      }
+    ],
+    egos: [
+      {
+        name: "Moby Dick",
+        description: "The embodiment of Ishmael's relentless pursuit.",
+        category: "WAW",
+        damage: "Pierce"
+      }
+    ],
+    tags: ["DPS", "Precision"],
+    passives: ["Hunter's Focus: Increased accuracy against Marked targets"],
+    sanitySkills: ["Relentless Pursuit: Gain Focus when attacking Marked targets"]
+  },
+  "9": {
+    id: "9",
+    name: "Rodion",
+    title: "The Nihilist Student",
+    description: "A calculating fighter who uses psychological warfare and precise strikes.",
+    image: "/DieciRodion.png",
+    rarity: 3,
+    sin: "Greed",
+    releaseDate: "2023-05-18",
+    statuses: ["Weakness", "Analysis"],
+    stats: {
+      hp: 170,
+      def: 42,
+      speed: 5,
+      minDmg: 38,
+      maxDmg: 54,
+      resistances: {
+        slash: 1.1,
+        pierce: 0.9,
+        blunt: 1.0
+      },
+      staggerThreshold: {
+        slash: 26,
+        pierce: 23,
+        blunt: 25
+      }
+    },
+    skills: [
+      {
+        name: "Analytical Strike",
+        description: "Study the target's weaknesses while attacking.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 3,
+          clash: 4,
+          counter: 4
+        },
+        effects: ["Apply Analysis (2 turns)", "Gain insight into target's resistances"]
+      },
+      {
+        name: "Exploit Weakness",
+        description: "A precise attack that takes advantage of analyzed weaknesses.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Bonus damage against Analyzed targets", "Apply Weakness"]
+      }
+    ],
+    egos: [
+      {
+        name: "Crime and Punishment",
+        description: "A manifestation of Rodion's analytical mind.",
+        category: "WAW",
+        damage: "Pierce"
+      }
+    ],
+    tags: ["Control", "Debuff"],
+    passives: ["Analytical Mind: Increased damage against analyzed targets"],
+    sanitySkills: ["Psychological Warfare: Chance to apply Weakness on hit"]
+  },
+  "10": {
+    id: "10",
+    name: "Sinclair",
+    title: "The Middle Little Brother",
+    description: "A balanced fighter who uses a mix of defensive and offensive techniques.",
+    image: "/MiddleSinclair.png",
+    rarity: 3,
+    sin: "Pride",
+    releaseDate: "2023-06-01",
+    statuses: ["Shield", "Counter"],
+    stats: {
+      hp: 195,
+      def: 54,
+      speed: 4,
+      minDmg: 42,
+      maxDmg: 56,
+      resistances: {
+        slash: 1.0,
+        pierce: 1.0,
+        blunt: 1.0
+      },
+      staggerThreshold: {
+        slash: 25,
+        pierce: 25,
+        blunt: 25
+      }
+    },
+    skills: [
+      {
+        name: "Defensive Stance",
+        description: "Take a defensive position while preparing a counter.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 3,
+          clash: 5,
+          counter: 4
+        },
+        effects: ["Gain Shield (2 turns)", "Set up Counter stance"]
+      },
+      {
+        name: "Brother's Revenge",
+        description: "A powerful counter-attack that benefits from defensive status.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 6
+        },
+        effects: ["Bonus damage while Shield is active", "Guaranteed Counter if attacked"]
+      }
+    ],
+    egos: [
+      {
+        name: "Middle Child",
+        description: "A manifestation of Sinclair's balanced nature.",
+        category: "WAW",
+        damage: "Blunt"
+      }
+    ],
+    tags: ["Tank", "Counter"],
+    passives: ["Balanced Spirit: Gain Counter when Shield is active"],
+    sanitySkills: ["Protective Instinct: Chance to gain Shield when attacked"]
+  },
+  "11": {
+    id: "11",
+    name: "Outis",
+    title: "The Faceless One",
+    description: "A mysterious fighter who specializes in deception and quick strikes.",
+    image: "/SevenOutis.png",
+    rarity: 3,
+    sin: "Sloth",
+    releaseDate: "2023-06-15",
+    statuses: ["Stealth", "Confusion"],
+    stats: {
+      hp: 175,
+      def: 45,
+      speed: 6,
+      minDmg: 36,
+      maxDmg: 52,
+      resistances: {
+        slash: 1.0,
+        pierce: 0.8,
+        blunt: 1.2
+      },
+      staggerThreshold: {
+        slash: 25,
+        pierce: 22,
+        blunt: 28
+      }
+    },
+    skills: [
+      {
+        name: "Shadow Strike",
+        description: "A quick attack from stealth that confuses the target.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 3,
+          clash: 4,
+          counter: 4
+        },
+        effects: ["Gain Stealth (2 turns)", "Apply Confusion on hit"]
+      },
+      {
+        name: "Faceless Assault",
+        description: "A series of rapid strikes that benefit from stealth.",
+        type: "Pierce",
+        damage: "Pierce",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 4,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Multiple hits while in Stealth", "Bonus damage to Confused targets"]
+      }
+    ],
+    egos: [
+      {
+        name: "Nobody",
+        description: "A manifestation of Outis's mysterious nature.",
+        category: "WAW",
+        damage: "Pierce"
+      }
+    ],
+    tags: ["Stealth", "Control"],
+    passives: ["Deceptive Nature: Increased damage from Stealth"],
+    sanitySkills: ["Mind Games: Chance to apply Confusion when entering Stealth"]
+  },
+  "12": {
+    id: "12",
+    name: "Gregor",
+    title: "The Metamorphosed",
+    description: "A transformed being who uses his unique condition in combat.",
+    image: "/ZweiGregor.png",
+    rarity: 3,
+    sin: "Envy",
+    releaseDate: "2023-06-29",
+    statuses: ["Transform", "Regeneration"],
+    stats: {
+      hp: 210,
+      def: 58,
+      speed: 3,
+      minDmg: 44,
+      maxDmg: 64,
+      resistances: {
+        slash: 1.2,
+        pierce: 1.2,
+        blunt: 0.6
+      },
+      staggerThreshold: {
+        slash: 28,
+        pierce: 28,
+        blunt: 20
+      }
+    },
+    skills: [
+      {
+        name: "Metamorphosis",
+        description: "Transform to gain enhanced abilities.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 2,
+        uses: 3,
+        coinPower: {
+          normal: 3,
+          clash: 4,
+          counter: 4
+        },
+        effects: ["Gain Transform status (3 turns)", "Activate Regeneration"]
+      },
+      {
+        name: "Insectoid Fury",
+        description: "A powerful attack while transformed.",
+        type: "Blunt",
+        damage: "Blunt",
+        cost: 3,
+        uses: 2,
+        coinPower: {
+          normal: 5,
+          clash: 3,
+          counter: 5
+        },
+        effects: ["Massive damage while Transformed", "Heal based on damage dealt"]
+      }
+    ],
+    egos: [
+      {
+        name: "The Metamorphosis",
+        description: "The ultimate manifestation of Gregor's transformed state.",
+        category: "WAW",
+        damage: "Blunt"
+      }
+    ],
+    tags: ["Tank", "Sustain"],
+    passives: ["Adaptive Body: Gain Regeneration while Transformed"],
+    sanitySkills: ["Survival Instinct: Automatically Transform at low HP"]
+  }
+};
 
-// Export the sinnerData object as default
-export default sinnerData
+export function getSinnerData(id: string): SinnerData | undefined {
+  return sinnersData[id];
+}

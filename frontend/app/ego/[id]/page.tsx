@@ -4,18 +4,22 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { getEgoData } from "@/lib/ego-data"
 
-// Mock data for a single EGO
 const getEgo = (id: string) => {
+  const ego = getEgoData(id)
+  if (!ego) {
+    throw new Error(`Ego with id ${id} not found`)
+  }
   return {
     id: Number.parseInt(id),
-    name: "Pale Rider",
-    rarity: 3,
-    sin: "Wrath",
-    damage: "Slash",
-    character: "Yi Sang",
-    image: "/placeholder.svg?height=300&width=300",
-    description: "A manifestation of Yi Sang's inner turmoil. This E.G.O. grants immense power at the cost of sanity.",
+    name: ego.name,
+    rarity: ego.category === "ALEPH" ? 4 : ego.category === "WAW" ? 3 : 2,
+    sin: ego.sin,
+    damage: ego.damage,
+    character: ego.sinner,
+    image: ego.image,
+    description: ego.description,
     effect: "Deal massive Slash damage to all enemies. Has a 30% chance to instantly kill targets below 25% HP.",
     stats: {
       power: 85,

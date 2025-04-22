@@ -34,6 +34,7 @@ export interface EGO {
   sin: string;
   damage: string;
   characterId: string;
+  sinner_id?: string;
   character?: Sinner;
   image: string;
 }
@@ -42,7 +43,7 @@ export interface Team {
   id: number;
   name: string;
   description: string;
-  characters: Sinner[];
+  sinners: Sinner[];
   egos: EGO[];
   user: string;
   createdAt: string;

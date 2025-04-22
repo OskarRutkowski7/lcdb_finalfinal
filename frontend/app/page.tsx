@@ -18,7 +18,7 @@ export default function Home() {
             <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
               <div className="h-40 w-40 rounded-full bg-primary/10 flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=160&width=160"
+                  src="/identity.png"
                   alt="Identity Icon"
                   width={160}
                   height={160}
@@ -42,7 +42,7 @@ export default function Home() {
             <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
               <div className="h-40 w-40 rounded-full bg-primary/10 flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=160&width=160"
+                  src="/ego.png"
                   alt="EGO Icon"
                   width={160}
                   height={160}
@@ -64,7 +64,7 @@ export default function Home() {
             <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
               <div className="h-40 w-40 rounded-full bg-primary/10 flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=160&width=160"
+                  src="/teambuilder.jpg"
                   alt="Team Builder Icon"
                   width={160}
                   height={160}
